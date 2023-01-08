@@ -1,0 +1,54 @@
+{
+	"playlists": [
+		{
+			"name": "test-playlist-${day}.${month}.${year}",
+			"time": "15 22 * * *",
+			"sources": [
+				{
+					"id": "2NPduAUeLVsfIauhRwuft1",
+					"type": "artist",
+					"strategy": {
+						"type": "popular",
+						"minTimes": 3,
+						"maxTimes": 3
+					}
+				},
+				{
+					"id": "37i9dQZF1F0sijgNaJdgit",
+					"type": "playlist",
+					"strategy": {
+						"type": "random",
+						"minTimes": 1,
+						"maxTimes": 3
+					}
+				},
+				{
+					"id": "3YMFdNqoNtVcCBKSUvjr8n",
+					"type": "show",
+					"strategy": {
+						"type": "latestNotHeard",
+						"amount": 1
+					}
+				},
+				{
+					"id": "37i9dQZF1EIflC8jblmWYq",
+					"type": "playlist",
+					"strategy": {
+						"type": "random",
+						"minTimes": 1,
+						"maxTimes": 3
+					}
+				},
+				{
+					"id": "",
+					"type": "",
+					"strategy": {
+						"type": "mostHeard",
+						"minTimes": 2,
+						"maxTimes": 3
+					}
+				}
+			]
+		}
+	]
+}
