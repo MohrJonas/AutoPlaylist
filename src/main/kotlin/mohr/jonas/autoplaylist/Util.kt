@@ -28,7 +28,7 @@ fun ReleaseDate?.noLongerAgoThan(daysBack: Int): Boolean {
 inline operator fun <reified T> Array<T>.times(amount: Int) = Array(amount) { this }.flatten().toTypedArray()
 
 fun ReleaseDate?.toDate(): LocalDate = (this ?: ReleaseDate(1970, 1, 1)).let {
-    LocalDate.of(it.year, it.month ?: 0, it.day ?: 0)
+    LocalDate.of(it.year, it.month ?: 1, it.day ?: 1)
 }
 
 inline fun <reified T> T?.orElseThrow(exception: RuntimeException): T {

@@ -1,6 +1,7 @@
 package mohr.jonas.autoplaylist.strategies
 
 import com.adamratzman.spotify.SpotifyClientApi
+import com.adamratzman.spotify.endpoints.pub.ArtistApi
 import com.adamratzman.spotify.models.*
 import kotlinx.serialization.Serializable
 import mohr.jonas.autoplaylist.TrackSource
@@ -31,8 +32,7 @@ abstract class SelectionStrategy {
         }
 
         suspend fun getArtistTracks(api: SpotifyClientApi, id: String, maxReleaseTimeAgo: Int): Array<SimpleTrack> {
-            return api.artists.getArtistAlbums(id).items
-                .filter { it.albumType == AlbumResultType.Album }
+            return api.artists.getArtistAlbums(id, include = arrayOf(ArtistApi.AlbumInclusionStrategy.Album)).items
                 .filter { it.releaseDate.noLongerAgoThan(maxReleaseTimeAgo) }
                 .map { api.albums.getAlbumTracks(it.id).items }
                 .flatten().toTypedArray()

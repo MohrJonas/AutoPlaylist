@@ -1,7 +1,7 @@
 FROM maven:3-ibm-semeru-17-focal AS builder
 
 RUN DEBIAN_FRONTEND=noninteractive apt update
-RUN DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends --no-intall--suggests -y git
+RUN DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y git
 
 WORKDIR /
 

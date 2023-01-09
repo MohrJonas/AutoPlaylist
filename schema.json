@@ -64,13 +64,20 @@
 											}
 										}
 									},
-									"required": ["type", "id", "strategy"],
+									"required": [
+										"type",
+										"id",
+										"strategy"
+									],
 									"additionalProperties": false
 								}
 							]
 						}
 					},
-					"required": ["time", "name"],
+					"required": [
+						"time",
+						"name"
+					],
 					"additionalProperties": false
 				}
 			]

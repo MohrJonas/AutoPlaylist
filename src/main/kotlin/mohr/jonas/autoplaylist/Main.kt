@@ -5,7 +5,6 @@ import it.sauronsoftware.cron4j.Scheduler
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
-import kotlinx.cli.required
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -39,7 +38,7 @@ fun main(args: Array<String>): Unit = runBlocking {
         println("Current time: ${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}")
         instructions.playlists.forEach {
             val predictor = Predictor(it.cronPattern)
-            val diff = predictor.nextMatchingTime()- System.currentTimeMillis()
+            val diff = predictor.nextMatchingTime() - System.currentTimeMillis()
             println("${it.playlistName}\t[${it.cronPattern}]\tin ${TimeUnit.MILLISECONDS.toMinutes(diff)} minutes (${TimeUnit.MILLISECONDS.toHours(diff)} hours)")
         }
         println("================")

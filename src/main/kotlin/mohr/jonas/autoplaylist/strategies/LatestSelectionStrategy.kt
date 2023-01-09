@@ -1,6 +1,7 @@
 package mohr.jonas.autoplaylist.strategies
 
 import com.adamratzman.spotify.SpotifyClientApi
+import com.adamratzman.spotify.endpoints.pub.ArtistApi
 import com.adamratzman.spotify.models.PlayableUri
 import com.adamratzman.spotify.models.Playlist
 import mohr.jonas.autoplaylist.TrackSource
@@ -26,9 +27,10 @@ class LatestSelectionStrategy(private val amount: Int = 1) :
             }
 
             "artist" -> {
-                val tracks = api.artists.getArtistAlbums(source.trackId).items
+                val tracks = api.artists.getArtistAlbums(source.trackId, include = arrayOf(ArtistApi.AlbumInclusionStrategy.Album)).items
                     .sortedBy { it.releaseDate.toDate() }
                     .reversed()
+                    .take(amount)
                     .map { api.albums.getAlbumTracks(it.id).items }.flatten()
                 api.playlists.addPlayablesToClientPlaylist(playlist.id, *tracks.map { it.uri as PlayableUri }.toTypedArray())
             }
