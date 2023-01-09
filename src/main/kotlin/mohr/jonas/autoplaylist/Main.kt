@@ -1,5 +1,7 @@
 package mohr.jonas.autoplaylist
 
+import com.adamratzman.spotify.models.PlaylistTrack
+import com.adamratzman.spotify.models.SimpleEpisode
 import it.sauronsoftware.cron4j.Predictor
 import it.sauronsoftware.cron4j.Scheduler
 import kotlinx.cli.ArgParser
@@ -10,12 +12,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
+import kotlin.io.path.readText
 
 fun main(args: Array<String>): Unit = runBlocking {
     val parser = ArgParser("autoplaylist")
@@ -25,13 +28,14 @@ fun main(args: Array<String>): Unit = runBlocking {
     val clientId by parser.option(ArgType.String, "clientId", "id", description = "The client id")
     val clientSecret by parser.option(ArgType.String, "clientSecret", "sec", description = "The client secret")
     parser.parse(args)
-    if (!watch && playlist == null) throw IllegalArgumentException("Either watch (-w) or playlist (-p) have to be specified")
+    if ((!watch && playlist == null) || (watch && playlist != null))
+        throw IllegalArgumentException("Either watch (-w) or playlist (-p) have to be specified")
     val configPath = Path.of(configFile ?: System.getenv("CONFIG_FILE"))
-    if (!Files.exists(configPath)) throw IllegalArgumentException("Config ${configPath.absolutePathString()} doesn't exist")
+    if (!configPath.exists()) throw IllegalArgumentException("Config ${configPath.absolutePathString()} doesn't exist")
     val token = TokenManager.getToken(clientId ?: System.getenv("CLIENT_ID"), clientSecret ?: System.getenv("CLIENT_SECRET"))
     val api = TokenManager.buildApi(clientId ?: System.getenv("CLIENT_ID"), clientSecret ?: System.getenv("CLIENT_SECRET"), token)
     val instructions = Json.decodeFromString<Instructions>(withContext(Dispatchers.IO) {
-        Files.readString(configPath)
+        configPath.readText()
     })
     if (watch) {
         println("====Schedule====")
@@ -46,13 +50,15 @@ fun main(args: Array<String>): Unit = runBlocking {
         instructions.playlists.forEach {
             scheduler.schedule(it.cronPattern) {
                 runBlocking {
-                    it.build(api)
+                    it.build(api, instructions.scriptDirectory, configPath)
                 }
             }
         }
         scheduler.isDaemon = false
         scheduler.start()
     } else {
-        instructions.playlists.find { it.playlistName == playlist }.orElseThrow(NullPointerException("Unable to find playlist with name $playlist")).build(api)
+        instructions.playlists.find { it.playlistName == playlist }
+            .orElseThrow(NullPointerException("Unable to find playlist with name $playlist"))
+            .build(api, instructions.scriptDirectory, configPath)
     }
 }

@@ -1,0 +1,9 @@
+{
+	"playlists": [
+		{
+			"time": "0 0 * * 1-5",
+			"name": "🚕 Better Daily Drive"
+		}
+	],
+	"scriptDirectory": "scripts"
+}

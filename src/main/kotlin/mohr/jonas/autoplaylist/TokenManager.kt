@@ -16,21 +16,25 @@ import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 object TokenManager {
 
     private val TOKEN_PATH = Path.of(System.getProperty("user.home"), ".autoplaylist", "token.secret")
 
     private fun loadToken(path: Path): Token {
-        return Json.decodeFromString(Files.readString(path))
+        return Json.decodeFromString(path.readText())
     }
 
     private fun saveToken(path: Path, token: Token) {
-        Files.createDirectories(path.parent)
-        Files.writeString(path, Json.encodeToString(token))
+        path.parent.createDirectories()
+        path.writeText(Json.encodeToString(token))
     }
 
-    private fun hasSavedToken(path: Path) = Files.exists(path)
+    private fun hasSavedToken(path: Path) = path.exists()
 
     private fun buildUrl(clientId: String, redirect: String): String = getSpotifyAuthorizationUrl(
         SpotifyScope.PlaylistReadPrivate,

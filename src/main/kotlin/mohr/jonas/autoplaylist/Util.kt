@@ -3,7 +3,6 @@ package mohr.jonas.autoplaylist
 import com.adamratzman.spotify.endpoints.client.ClientPlaylistApi
 import com.adamratzman.spotify.models.Playlist
 import com.adamratzman.spotify.models.ReleaseDate
-import java.lang.RuntimeException
 import java.time.LocalDate
 import java.time.Period
 
@@ -21,7 +20,7 @@ inline fun <reified T> Array<T>.randomSelection(min: Int, max: Int): List<T> {
 
 @Suppress("Deprecation")
 fun ReleaseDate?.noLongerAgoThan(daysBack: Int): Boolean {
-    if(this == null) return true
+    if (this == null) return true
     return Period.between(LocalDate.of(year, month ?: 6, day ?: 15), LocalDate.now()).days < daysBack
 }
 
@@ -32,6 +31,6 @@ fun ReleaseDate?.toDate(): LocalDate = (this ?: ReleaseDate(1970, 1, 1)).let {
 }
 
 inline fun <reified T> T?.orElseThrow(exception: RuntimeException): T {
-    if(this == null) throw exception
+    if (this == null) throw exception
     return this
 }

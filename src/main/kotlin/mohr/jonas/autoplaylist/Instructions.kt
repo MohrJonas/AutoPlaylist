@@ -1,16 +1,13 @@
 package mohr.jonas.autoplaylist
 
-import com.adamratzman.spotify.SpotifyClientApi
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Instructions(val playlists: Array<Playlist> = emptyArray()) {
+data class Instructions(
+    val scriptDirectory: String,
+    val playlists: Array<Playlist> = emptyArray()
+) {
 
-    suspend fun build(api: SpotifyClientApi) {
-        playlists.forEach {
-            it.build(api)
-        }
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
