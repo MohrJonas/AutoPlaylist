@@ -9,13 +9,15 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.server.ApacheServer
+import org.http4k.server.ServerConfig
 import org.http4k.server.asServer
 import java.awt.Desktop
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.Charset
-import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -60,7 +62,7 @@ object TokenManager {
             Response(Status.OK).body("<h1>Done</h1>").also {
                 code = req.query("code")
             }
-        }.asServer(ApacheServer(port))
+        }.asServer(ApacheServer(port, stopMode = ServerConfig.StopMode.Graceful(Duration.of(5, TimeUnit.SECONDS.toChronoUnit()))))
         server.start()
         while (code == null) Thread.sleep(100L)
         server.stop()
