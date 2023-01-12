@@ -13,6 +13,6 @@ RUN mvn clean package
 
 FROM bellsoft/liberica-openjdk-debian:17-x86_64
 
-COPY --from=builder /autoPlaylist/target/AutoPlaylist-2.0.0.jar /
+COPY --from=builder /autoPlaylist/target/AutoPlaylist-3.0.0.jar /
 
-ENTRYPOINT ["java", "-server", "-jar", "/AutoPlaylist-2.0.0.jar", "-w"]
+ENTRYPOINT ["java", "-server", "-jar", "/AutoPlaylist-3.0.0.jar", "-w"]
