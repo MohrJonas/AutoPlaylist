@@ -9,13 +9,15 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.server.ApacheServer
+import org.http4k.server.ServerConfig
 import org.http4k.server.asServer
 import java.awt.Desktop
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.Charset
-import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.readText
@@ -24,6 +26,7 @@ import kotlin.io.path.writeText
 object TokenManager {
 
     private val TOKEN_PATH = Path.of(System.getProperty("user.home"), ".autoplaylist", "token.secret")
+    private lateinit var refreshToken: String
 
     private fun loadToken(path: Path): Token {
         return Json.decodeFromString(path.readText())
@@ -60,7 +63,7 @@ object TokenManager {
             Response(Status.OK).body("<h1>Done</h1>").also {
                 code = req.query("code")
             }
-        }.asServer(ApacheServer(port))
+        }.asServer(ApacheServer(port, stopMode = ServerConfig.StopMode.Graceful(Duration.of(5, TimeUnit.SECONDS.toChronoUnit()))))
         server.start()
         while (code == null) Thread.sleep(100L)
         server.stop()
@@ -73,14 +76,19 @@ object TokenManager {
     }
 
     suspend fun getToken(clientId: String, clientSecret: String): Token {
-        if (hasSavedToken(TOKEN_PATH)) return loadToken(TOKEN_PATH)
+        if (hasSavedToken(TOKEN_PATH)) return loadToken(TOKEN_PATH).also { refreshToken = it.refreshToken!! }
         val url = buildUrl(clientId, "http://127.0.0.1:16823")
         openOrShowURL(URI.create(url))
         val autoCode = fetchCode(16823)
         val api = buildApi(clientId, clientSecret, autoCode)
         val token = api.token
+        refreshToken = token.refreshToken!!
         saveToken(TOKEN_PATH, token)
         return token
     }
 
+    suspend fun refreshToken(api: SpotifyClientApi) {
+        api.refreshToken()
+        api.token.refreshToken = refreshToken
+    }
 }

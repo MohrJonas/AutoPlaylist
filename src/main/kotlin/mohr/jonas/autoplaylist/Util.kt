@@ -3,8 +3,10 @@ package mohr.jonas.autoplaylist
 import com.adamratzman.spotify.endpoints.client.ClientPlaylistApi
 import com.adamratzman.spotify.models.Playlist
 import com.adamratzman.spotify.models.ReleaseDate
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.Period
+import java.util.TimerTask
 
 suspend fun ClientPlaylistApi.getPlaylistByName(name: String): Playlist? {
     return getClientPlaylists().items.firstOrNull { it.name == name }?.toFullPlaylist()
@@ -33,4 +35,12 @@ fun ReleaseDate?.toDate(): LocalDate = (this ?: ReleaseDate(1970, 1, 1)).let {
 inline fun <reified T> T?.orElseThrow(exception: RuntimeException): T {
     if (this == null) throw exception
     return this
+}
+
+fun (suspend () -> Unit).asTimerTask() = object : TimerTask() {
+    override fun run() {
+        runBlocking {
+            this@asTimerTask()
+        }
+    }
 }
