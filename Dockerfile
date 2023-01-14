@@ -1,3 +1,4 @@
+MAINTAINER MohrJonas
 FROM maven:3-ibm-semeru-17-focal AS builder
 
 RUN DEBIAN_FRONTEND=noninteractive apt update
@@ -13,6 +14,8 @@ RUN mvn clean package
 
 FROM bellsoft/liberica-openjdk-debian:17-x86_64
 
-COPY --from=builder /autoPlaylist/target/AutoPlaylist-3.0.0.jar /
+COPY --from=builder /autoPlaylist/target/AutoPlaylist-4.0.0.jar /
 
-ENTRYPOINT ["java", "-server", "-jar", "/AutoPlaylist-3.0.0.jar", "-w"]
+EXPOSE 16823
+
+ENTRYPOINT ["java", "-server", "-jar", "/AutoPlaylist-4.0.0.jar", "-w"]
