@@ -6,7 +6,7 @@
 
     <artifactId>AutoPlaylist</artifactId>
     <groupId>mohr.jonas</groupId>
-    <version>3.0.0</version>
+    <version>4.0.0</version>
     <packaging>jar</packaging>
 
     <name>autoplaylist</name>

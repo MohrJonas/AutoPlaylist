@@ -14,12 +14,10 @@ import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.readText
-import kotlin.time.Duration.Companion.seconds
 
 fun main(args: Array<String>): Unit = runBlocking {
     val parser = ArgParser("autoplaylist")
@@ -38,9 +36,6 @@ fun main(args: Array<String>): Unit = runBlocking {
     val instructions = Json.decodeFromString<Instructions>(withContext(Dispatchers.IO) {
         configPath.readText()
     })
-    println("Token has ttl ${api.token.expiresIn}")
-    val timer = Timer()
-    refreshToken(api, timer)
     if (watch) {
         println("====Schedule====")
         println("Current time: ${LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}")
@@ -54,6 +49,7 @@ fun main(args: Array<String>): Unit = runBlocking {
         instructions.playlists.forEach {
             scheduler.schedule(it.cronPattern) {
                 runBlocking {
+                    refreshToken(api)
                     it.build(api, instructions.scriptDirectory, configPath)
                 }
             }
@@ -61,7 +57,8 @@ fun main(args: Array<String>): Unit = runBlocking {
         scheduler.isDaemon = false
         scheduler.start()
     } else {
-        instructions.playlists.find { it.playlistName == playlist }
+        refreshToken(api)
+        instructions.playlists.find { it.playlistName == playlist || it.scriptName == playlist }
             .orElseThrow(NullPointerException("Unable to find playlist with name $playlist"))
             .build(api, instructions.scriptDirectory, configPath)
     }
@@ -74,11 +71,7 @@ private fun String?.getOrEnvOrThrow(envName: String): String {
     throw NullPointerException("String was neither supplied nor found in an environment variable")
 }
 
-suspend fun refreshToken(api: SpotifyClientApi, timer: Timer) {
+suspend fun refreshToken(api: SpotifyClientApi) {
     println("Refreshing token with ttl ${api.token.expiresIn}")
     TokenManager.refreshToken(api)
-    timer.schedule(
-        suspend { refreshToken(api, timer) }.asTimerTask(),
-        (api.token.expiresIn - 60).seconds.inWholeMilliseconds
-    )
 }

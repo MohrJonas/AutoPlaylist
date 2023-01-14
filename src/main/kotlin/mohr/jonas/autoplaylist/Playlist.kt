@@ -19,6 +19,7 @@ import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromT
 data class Playlist(
     @SerialName("time") val cronPattern: String? = null,
     @SerialName("name") val playlistName: String,
+    val scriptName: String = playlistName
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -27,12 +28,15 @@ data class Playlist(
         other as Playlist
         if (cronPattern != other.cronPattern) return false
         if (playlistName != other.playlistName) return false
+        if (scriptName != other.scriptName) return false
         return true
     }
 
     override fun hashCode(): Int {
         var result = cronPattern.hashCode()
         result = 31 * result + playlistName.hashCode()
+        result = 31 * result + cronPattern.hashCode()
+        result = 31 * result + scriptName.hashCode()
         return result
     }
 
@@ -47,7 +51,7 @@ data class Playlist(
         val interpolatedPlaylistName = substitutor.replace(playlistName)
         val playlist = api.playlists.getPlaylistByName(interpolatedPlaylistName) ?: api.playlists.createClientPlaylist(interpolatedPlaylistName, public = false)
         api.playlists.removeAllClientPlaylistPlayables(playlist.id)
-        val scriptPath = configPath.parent.resolve(scriptDirectoryName).resolve("$playlistName.kts")
+        val scriptPath = configPath.parent.resolve(scriptDirectoryName).resolve("$scriptName.kts")
         if (!scriptPath.exists()) throw FileNotFoundException("Script with path ${scriptPath.absolutePathString()} doesn't exist")
         val compileConfiguration = createJvmCompilationConfigurationFromTemplate<Script>()
         val evaluationConfiguration = ScriptEvaluationConfiguration {
