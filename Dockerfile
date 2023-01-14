@@ -1,5 +1,6 @@
-MAINTAINER MohrJonas
 FROM maven:3-ibm-semeru-17-focal AS builder
+
+MAINTAINER MohrJonas
 
 RUN DEBIAN_FRONTEND=noninteractive apt update
 RUN DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -y git
